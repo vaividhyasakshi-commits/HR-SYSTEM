@@ -1,0 +1,172 @@
+.scheduleinfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 17px;
+  background: #f1f6fa;
+  border: 1px solid #e1eaf0;
+  border-radius: 10px;
+  color: #4e7285;
+  margin: -8px 0 22px;
+  font-size: 12px;
+}
+.scheduleinfo b {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+.scheduleinfo span {
+  color: #7d96a4;
+  line-height: 1.5;
+}
+.remindcard {
+  margin-top: 22px;
+  border: 1px solid #e5eded;
+  border-radius: 15px;
+  padding: 22px 24px;
+  background: white;
+  box-shadow: 0 5px 24px #24404a05;
+}
+.remindtop {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.remindicon {
+  background: #e7f6ee;
+  color: #15825e;
+  border-radius: 11px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.remindtop h3 {
+  font: 800 16px Manrope;
+  margin: 0 0 4px;
+}
+.remindtop p {
+  font-size: 12px;
+  color: #81949b;
+  margin: 0;
+}
+.missingnames {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 18px 0 12px;
+}
+.missingnames span {
+  border-radius: 30px;
+  border: 1px solid #ebeeee;
+  background: #f7fafa;
+  color: #58727a;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 11px;
+}
+.remindhint {
+  font-size: 11px;
+  color: #93a2a8;
+  line-height: 1.6;
+}
+.remindactions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 17px;
+}
+.remindactions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 9px;
+  padding: 12px 16px;
+}
+.sendremind {
+  background: #1a936b;
+  color: white;
+  border: 1px solid #1a936b;
+}
+.sendremind:hover {
+  background: #107454;
+}
+.copyremind {
+  background: white;
+  color: #317d67;
+  border: 1px solid #c9e6dc;
+}
+.remindactions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.allreceived {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: #16866d;
+  margin-top: 16px;
+  font-size: 12px;
+}
+@media (max-width: 680px) {
+  .remindcard {
+    padding: 17px;
+  }
+  .remindactions button {
+    width: 100%;
+  }
+}
+.reminderpreview {
+  border: 1px solid #e4edeb;
+  background: #f8fbf9;
+  border-radius: 11px;
+  margin: 13px 0;
+  padding: 16px;
+}
+.reminderpreviewtitle {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6d9988;
+}
+.reminderpreview pre {
+  font-family: "DM Sans", sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+  font-size: 12px;
+  color: #3e5a54;
+  margin: 12px 0 0;
+}
+.reminder-button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.reminder-only-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(26, 147, 107, 0.15);
+}
+.reminder-only-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+@media (max-width: 680px) {
+  .reminder-only-button {
+    width: 100%;
+  }
+}
