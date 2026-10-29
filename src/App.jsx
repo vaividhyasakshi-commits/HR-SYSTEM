@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getPreviewPayload } from "./preview-data.js";
 import {
   LayoutDashboard,
   Code2,
@@ -24,6 +25,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 
+const isStaticPreview = import.meta.env.MODE === "github-pages";
+
 const teams = [
   { name: "Web Development", icon: Code2 },
   { name: "Video Editing", icon: Clapperboard },
@@ -44,7 +47,7 @@ const initials = (n) =>
     .join("")
     .toUpperCase();
 export default function App() {
-  const [authState, setAuthState] = useState("checking");
+  const [authState, setAuthState] = useState(isStaticPreview ? "yes" : "checking");
   const [date, setDate] = useState(today);
   const [team, setTeam] = useState("All");
   const [status, setStatus] = useState("all");
@@ -62,6 +65,10 @@ export default function App() {
     setLoading(true);
     setError("");
     try {
+      if (isStaticPreview) {
+        setPayload(getPreviewPayload(date));
+        return;
+      }
       const response = await fetch(
         "/api/reports?date=" + encodeURIComponent(date),
         { cache: "no-store" },
@@ -83,6 +90,7 @@ export default function App() {
     }
   }, [date]);
   useEffect(() => {
+    if (isStaticPreview) return;
     fetch("/api/session")
       .then((r) => r.json())
       .then((d) => setAuthState(d.authenticated ? "yes" : "login"))
@@ -231,13 +239,15 @@ export default function App() {
         <div className="sidefooter">
           <ShieldCheck size={17} />
           <div>
-            <b>HR workspace</b>
-            <span>Read-only report overview</span>
+            <b>{isStaticPreview ? "Dashboard preview" : "HR workspace"}</b>
+            <span>{isStaticPreview ? "Sample data only" : "Read-only report overview"}</span>
           </div>
         </div>
-        <button className="logout" onClick={logout}>
-          <LogOut size={16} /> Log out
-        </button>
+        {!isStaticPreview && (
+          <button className="logout" onClick={logout}>
+            <LogOut size={16} /> Log out
+          </button>
+        )}
       </aside>
       <main className="main">
         <div className="top">
@@ -252,8 +262,8 @@ export default function App() {
           </div>
           <div className="profile">
             <span>
-              <b>HR Workspace</b>
-              <small>Report overview</small>
+              <b>{isStaticPreview ? "Dashboard Preview" : "HR Workspace"}</b>
+              <small>{isStaticPreview ? "Sample data only" : "Report overview"}</small>
             </span>
             <div className="avatar">HR</div>
           </div>
@@ -261,7 +271,12 @@ export default function App() {
         <div className={"notice " + (mode === "live" ? "live" : "")}>
           <Mail size={17} />
           <span>
-            {mode === "live" ? (
+            {isStaticPreview ? (
+              <>
+                <b>Dashboard preview.</b> Showing fictional employees and sample
+                reports. Live Gmail reports and reminders are unavailable here.
+              </>
+            ) : mode === "live" ? (
               <>
                 <b>Gmail connected.</b> Only approved employee report emails are
                 shown.

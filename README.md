@@ -2,6 +2,16 @@
 
 React/Vite dashboard + Node/Express Gmail read-only API. Demo data is included; **no office emails or passwords are included**.
 
+## GitHub Pages preview
+
+Website: https://vaividhyasakshi-commits.github.io/HR-SYSTEM/
+
+The `Deploy HR dashboard preview` workflow builds and publishes this link after every push to `main`. GitHub Settings → Pages must use **GitHub Actions** as its source.
+
+`npm run build:pages` creates the static preview with the `/HR-SYSTEM/` asset path. It shows a clearly marked dashboard with fictional `example.com` employees and sample reports. This preview does not call the HR API, request HR credentials, read Gmail, or send reminders. Changing the date and department, searching, status filters, and opening sample reports work without a backend.
+
+For real employee reports, use the regular `npm run build` and `npm start` commands on a Node-capable host and configure the server-side environment variables below. The normal local and server builds keep HR authentication and Gmail access on the backend.
+
 ## VS Code: run locally
 
 1. Install Node.js 20+ and open this folder in VS Code.
