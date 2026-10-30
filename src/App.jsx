@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getPreviewPayload } from "./preview-data.js";
 import {
   LayoutDashboard,
   Code2,
@@ -25,8 +24,6 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-const isStaticPreview = import.meta.env.MODE === "github-pages";
-
 const teams = [
   { name: "Web Development", icon: Code2 },
   { name: "Video Editing", icon: Clapperboard },
@@ -35,6 +32,14 @@ const teams = [
 ];
 const today = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+const recentDays = (current) => Array.from({ length: 7 }, (_, index) => {
+  const [y, m, d] = current.split('-').map(Number);
+  const value = new Date(Date.UTC(y, m - 1, d - index));
+  return value.toISOString().slice(0, 10);
+});
+const dateLabel = (value) => new Date(value + 'T12:00:00Z').toLocaleDateString('en-IN', {
+  day: '2-digit', month: 'short', weekday: 'short', timeZone: 'UTC'
+});
 const subjectForDate = (value) => {
   const [year, month, day] = value.split("-");
   return "Daily Work Report - " + day + "/" + month + "/" + year;
@@ -47,8 +52,9 @@ const initials = (n) =>
     .join("")
     .toUpperCase();
 export default function App() {
-  const [authState, setAuthState] = useState(isStaticPreview ? "yes" : "checking");
+  const [authState, setAuthState] = useState("checking");
   const [date, setDate] = useState(today);
+  const [currentDay, setCurrentDay] = useState(today);
   const [team, setTeam] = useState("All");
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
@@ -65,10 +71,6 @@ export default function App() {
     setLoading(true);
     setError("");
     try {
-      if (isStaticPreview) {
-        setPayload(getPreviewPayload(date));
-        return;
-      }
       const response = await fetch(
         "/api/reports?date=" + encodeURIComponent(date),
         { cache: "no-store" },
@@ -90,7 +92,6 @@ export default function App() {
     }
   }, [date]);
   useEffect(() => {
-    if (isStaticPreview) return;
     fetch("/api/session")
       .then((r) => r.json())
       .then((d) => setAuthState(d.authenticated ? "yes" : "login"))
@@ -104,6 +105,25 @@ export default function App() {
     const t = setInterval(fetchReports, 60000);
     return () => clearInterval(t);
   }, [fetchReports, authState]);
+  useEffect(() => {
+    // The reporting day rolls over at 00:00 IST even if HR keeps this tab open.
+    const t = setInterval(() => {
+      const next = today();
+      setCurrentDay(previous => {
+        if (previous !== next) {
+          setDate(selected => selected === previous ? next : selected);
+          return next;
+        }
+        return previous;
+      });
+    }, 15000);
+    return () => clearInterval(t);
+  }, []);
+  const days = useMemo(() => recentDays(currentDay), [currentDay]);
+  const isHistorical = date !== currentDay;
+  useEffect(() => {
+    if (!days.includes(date)) setDate(currentDay);
+  }, [days, date, currentDay]);
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") setSelected(null);
@@ -236,18 +256,33 @@ export default function App() {
             </span>
           </button>
         ))}
+        <div className="navgroup" style={{ marginTop: 28 }}>REPORT HISTORY</div>
+        <div style={{ padding: '0 12px 16px' }}>
+          <div style={{ color: '#91b8c2', fontSize: 11, padding: '0 8px 10px' }}>
+            Rolling 7-day report history
+          </div>
+          {days.map((day) => (
+            <button key={day} onClick={() => { setDate(day); setTeam('All'); setStatus('all'); setSearch(''); }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '12px 13px', marginBottom: 6, borderRadius: 10, border: date === day ? '1px solid #64cbb3' : '1px solid transparent', background: date === day ? '#245660' : 'transparent', color: date === day ? '#fff' : '#c0d5db', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                <CalendarDays size={16} />{dateLabel(day)}
+              </span>
+              <span style={{ fontSize: 10, padding: '4px 7px', background: day === currentDay ? '#167e66' : '#234551', borderRadius: 7, color: '#eafff9' }}>
+                {day === currentDay ? 'LIVE' : 'VIEW'}
+              </span>
+            </button>
+          ))}
+        </div>
         <div className="sidefooter">
           <ShieldCheck size={17} />
           <div>
-            <b>{isStaticPreview ? "Dashboard preview" : "HR workspace"}</b>
-            <span>{isStaticPreview ? "Sample data only" : "Read-only report overview"}</span>
+            <b>HR workspace</b>
+            <span>Read-only report overview</span>
           </div>
         </div>
-        {!isStaticPreview && (
-          <button className="logout" onClick={logout}>
-            <LogOut size={16} /> Log out
-          </button>
-        )}
+        <button className="logout" onClick={logout}>
+          <LogOut size={16} /> Log out
+        </button>
       </aside>
       <main className="main">
         <div className="top">
@@ -262,8 +297,8 @@ export default function App() {
           </div>
           <div className="profile">
             <span>
-              <b>{isStaticPreview ? "Dashboard Preview" : "HR Workspace"}</b>
-              <small>{isStaticPreview ? "Sample data only" : "Report overview"}</small>
+              <b>HR Workspace</b>
+              <small>Report overview</small>
             </span>
             <div className="avatar">HR</div>
           </div>
@@ -271,12 +306,7 @@ export default function App() {
         <div className={"notice " + (mode === "live" ? "live" : "")}>
           <Mail size={17} />
           <span>
-            {isStaticPreview ? (
-              <>
-                <b>Dashboard preview.</b> Showing fictional employees and sample
-                reports. Live Gmail reports and reminders are unavailable here.
-              </>
-            ) : mode === "live" ? (
+            {mode === "live" ? (
               <>
                 <b>Gmail connected.</b> Only approved employee report emails are
                 shown.
@@ -306,6 +336,11 @@ export default function App() {
             </span>
           </div>
         </div>
+        {isHistorical && <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#eaf5f3', border: '1px solid #bfe7dd', borderRadius: 12, padding: '14px 18px', marginBottom: 20, color: '#246f62', fontWeight: 700, fontSize: 13 }}>
+          <CalendarDays size={19} />
+          <span>Past report · {dateLabel(date)} — {received} submitted, {missing.length} pending. Only emails received before that day's midnight are counted.</span>
+          <button style={{ marginLeft: 'auto', background: '#167e66', color: '#fff', border: 0, borderRadius: 8, padding: '9px 12px', cursor: 'pointer', fontWeight: 700 }} onClick={() => setDate(currentDay)}>Today</button>
+        </div>}
         {error && (
           <div className="error">
             <AlertCircle size={17} />
@@ -356,7 +391,9 @@ export default function App() {
                 type="date"
                 aria-label="Report date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                min={days[6]}
+                max={currentDay}
+                onChange={(e) => { if (days.includes(e.target.value)) setDate(e.target.value); }}
               />
             </label>
             <label className="search">
